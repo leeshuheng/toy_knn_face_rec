@@ -6,7 +6,7 @@ cmake .
 
 make
 
-./tst
+./tst ~/data/att_faces/a.txt
 
 ## Create pdf(Chinese)
 
