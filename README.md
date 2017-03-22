@@ -12,6 +12,8 @@ make
 
 pdflatex -shell-escape ./blog43.tex
 
+bibtex blog43.aux
+
 pdflatex -shell-escape ./blog43.tex
 
 pdflatex -shell-escape ./blog43.tex
