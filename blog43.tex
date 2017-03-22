@@ -1,0 +1,66 @@
+%%% 2017年 03月 22日 星期三 10:00:24 CST
+
+%% Run: pdflatex -shell-escape ./blog43.tex
+
+
+\documentclass[a4paper]{article}
+
+\usepackage[top=3cm,left=2cm,right=2cm,bottom=2cm]{geometry}
+\usepackage[backend=bibtex]{biblatex}
+\usepackage[pdftex]{hyperref}
+\usepackage{xcolor}
+\usepackage{minted}
+\usepackage{CJKutf8}
+
+\begin{document}
+
+\begin{CJK}{UTF8}{gkai}
+	\title{一个玩具---自制人脸识别}
+	\author{李小丹}
+	\date{2017-03-22}
+
+	\maketitle
+\end{CJK}
+
+\begin{CJK}{UTF8}{gbsn}
+
+	\section*{自己动手}
+	\href{http://opencv.org/}{OpenCV}提供了一些人脸识别的工具，比如FaceRecognizer.
+	但自制一个人脸识别器是件挺好玩的事情，我用kNN实现了一个。
+
+	\section*{三步实现}
+	\begin{itemize}
+		\item 数据预处理
+		\item train
+		\item 检查预测的效果
+	\end{itemize}
+
+	\section*{数据来源}
+	数据使用\href{http://www.cl.cam.ac.uk/research/dtg/attarchive/facedatabase.html}
+	{AT\&T Facedatabase}。
+	还需要生成一个\href{http://docs.opencv.org/3.1.0/da/d60/tutorial_face_main.html#tutorial_face_prepare}{label文件}。
+	也可以cd到数据存放的路径，使用这样的shell命令来生成这个文件：
+	\begin{minted}{shell}
+j=0;
+while [ $j -le 39 ]; do i=1;while [ $i -le 10 ];
+do echo "/home/shuheng/文档/att_faces/s$((j+1))/$i.pgm;$j"; i=$((i+1));
+done; j=$((j+1)); done > a.txt
+	\end{minted}
+
+	\section*{实现步骤}
+	\begin{description}
+		\item [读取数据] 我借用了\href{http://docs.opencv.org/3.1.0/da/d60/tutorial_face_main.html#tutorial_face_fisherfaces_use}
+			{read\_csv}。它来自OpenCV tutorial中的一个例子。
+		\item [数据预处理] 利用OpenCV中（cvtColor + convertTo + reshape）对图片
+			进行一系列的处理，最后形成一个TrainData。
+		\item [实例化kNN] {\verb|KNearest::create|}
+		\item [模型训练]  {\verb|KNearest::train|}
+		\item [预测]   {\verb|KNearest::predict|}
+	\end{description}
+
+	\section*{代码}
+	代码存放在\href{https://github.com/leeshuheng/toy_knn_face_rec}{github}。
+
+\clearpage\end{CJK}
+
+\end{document}
