@@ -47,11 +47,15 @@ static void read_csv(const string& filename, vector<Mat>& images, vector<int>& l
 	}
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+	if(argc < 2) return 1;
+
 	vector<Mat> ims;
 	vector<int> lbs;
-	read_csv("/home/shuheng/data/att_faces/a.txt", ims, lbs);
+
+	read_csv(argv[1], ims, lbs);
+
 	Mat lbv(lbs);
 	lbv.convertTo(lbv, CV_32F);
 	Mat imv(ims.size(), ims[0].cols, ims[0].type());
