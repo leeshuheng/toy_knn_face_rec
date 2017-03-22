@@ -12,6 +12,9 @@
 \usepackage{minted}
 \usepackage{CJKutf8}
 
+
+\bibliography{blog43}
+
 \begin{document}
 
 \begin{CJK}{UTF8}{gkai}
@@ -25,21 +28,21 @@
 \begin{CJK}{UTF8}{gbsn}
 
 	\section*{自己动手}
-	\href{http://opencv.org/}{OpenCV}提供了一些人脸识别的工具，比如FaceRecognizer.
-	但自制一个人脸识别器是件挺好玩的事情，我用kNN实现了一个。
+	\href{http://opencv.org/}{OpenCV}提供了一些人脸识别的工具，
+	比如FaceRecognizer。但自制一个人脸识别器是件挺好玩的事情，我用kNN实现了一个。
 
 	\section*{三步实现}
 	\begin{itemize}
 		\item 数据预处理
 		\item train
-		\item 检查预测的效果
+		\item predict
 	\end{itemize}
 
 	\section*{数据来源}
 	数据使用\href{http://www.cl.cam.ac.uk/research/dtg/attarchive/facedatabase.html}
 	{AT\&T Facedatabase}。
-	还需要生成一个\href{http://docs.opencv.org/3.1.0/da/d60/tutorial_face_main.html#tutorial_face_prepare}{label文件}。
-	也可以cd到数据存放的路径，使用这样的shell命令来生成这个文件：
+	另外还需要生成一个\href{http://docs.opencv.org/3.1.0/da/d60/tutorial_face_main.html#tutorial_face_prepare}{label文件}。
+	可以cd到数据存放的路径，使用下面的shell命令来生成这个文件：
 	\begin{minted}{shell}
 j=0;
 while [ $j -le 39 ]; do i=1;while [ $i -le 10 ];
@@ -50,17 +53,69 @@ done; j=$((j+1)); done > a.txt
 	\section*{实现步骤}
 	\begin{description}
 		\item [读取数据] 我借用了\href{http://docs.opencv.org/3.1.0/da/d60/tutorial_face_main.html#tutorial_face_fisherfaces_use}
-			{read\_csv}。它来自OpenCV tutorial中的一个例子。
-		\item [数据预处理] 利用OpenCV中（cvtColor + convertTo + reshape）对图片
-			进行一系列的处理，最后形成一个TrainData。
-		\item [实例化kNN] {\verb|KNearest::create|}
-		\item [模型训练]  {\verb|KNearest::train|}
-		\item [预测]   {\verb|KNearest::predict|}
+			{read\_csv}。它来自OpenCV tutorial \cite{tutorial}中的一个例子。
+		\item [数据预处理] 利用OpenCV（cvtColor + convertTo + reshape）
+			对图片进行一系列的处理，最后形成一个TrainData\cite{traindata}。
+		\item [实例化kNN] {\verb|KNearest::create|}\cite{knn}
+		\item [模型训练]  {\verb|KNearest::train|}\cite{knn}
+		\item [预测]   {\verb|KNearest::predict|}\cite{knn}
 	\end{description}
 
 	\section*{代码}
-	代码存放在\href{https://github.com/leeshuheng/toy_knn_face_rec}{github}。
+	代码存放在
+	\href{https://github.com/leeshuheng/toy_knn_face_rec/blob/master/blog_main.cpp}
+	{Github}上。
+
+	\section*{识别结果}
+	\begin{center}
+	\begin{tabular}{|c|c|}
+		\hline
+		\textbf{Predict label} & \textbf{Actual label} \\\hline
+		14   &  14  \\\hline
+		21   &  21  \\\hline
+		37   &  37  \\\hline
+		8   &  8  \\\hline
+		7   &  7  \\\hline
+		25   &  27  \\\hline
+		39   &  39  \\\hline
+		28   &  28  \\\hline
+		15   &  15  \\\hline
+		27   &  36  \\\hline
+		27   &  36  \\\hline
+		30   &  30  \\\hline
+		28   &  19  \\\hline
+		22   &  22  \\\hline
+		0   &  0  \\\hline
+		4   &  4  \\\hline
+		37   &  37  \\\hline
+		27   &  36  \\\hline
+		37   &  22  \\\hline
+		25   &  25  \\\hline
+		11   &  11  \\\hline
+		18   &  18  \\\hline
+		14   &  14  \\\hline
+		38   &  38  \\\hline
+		14   &  14  \\\hline
+		5   &  5  \\\hline
+		32   &  32  \\\hline
+		20   &  20  \\\hline
+		8   &  8  \\\hline
+		38   &  38  \\\hline
+		25   &  25  \\\hline
+		6   &  6  \\\hline
+		23   &  23  \\\hline
+		8   &  8  \\\hline
+		22   &  22  \\\hline
+		11   &  11  \\\hline
+		32   &  32  \\\hline
+		26   &  26  \\\hline
+		31   &  31  \\\hline
+		0   &  0  \\\hline
+	\end{tabular}
+	\end{center}
 
 \clearpage\end{CJK}
+
+\printbibliography
 
 \end{document}
