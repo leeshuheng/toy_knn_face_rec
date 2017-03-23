@@ -1,5 +1,7 @@
 # toy_knn_face_rec
 
+Toy face recognition using knn.
+
 ## Run:
 
 cmake .
