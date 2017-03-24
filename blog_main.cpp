@@ -25,7 +25,6 @@ void data_reshape(Mat &im)
 	im = im.reshape(0, 1);
 }
 
-
 // credit: http://docs.opencv.org/3.1.0/da/d60/tutorial_face_main.html
 static void read_csv(const string& filename, vector<Mat>& images, vector<int>& labels, char separator = ';') {
 	std::ifstream file(filename.c_str(), ifstream::in);
@@ -47,14 +46,49 @@ static void read_csv(const string& filename, vector<Mat>& images, vector<int>& l
 	}
 }
 
-int main(int argc, char *argv[])
-{
-	if(argc < 2) return 1;
+class face_rec {
+public:
+	face_rec();
+	face_rec(const char *);
 
+public:
+	int load(const char *);
+	int set_train_ratio(double = 0.8);
+	int get_sample_count() const;
+	int get_train_count() const;
+	Mat get_sample_idx() const;
+	int set_default_k(int = 3);
+	int train();
+	inline float predict(InputArray, OutputArray = noArray(), int flags = 0);
+	int test();
+
+private:
+	Ptr<KNearest> knnp;
+	Ptr<TrainData> tdp;
+};
+
+face_rec::face_rec()
+:knnp(KNearest::create())
+{
+	knnp->setIsClassifier(true);
+	knnp->setDefaultK(3);
+}
+
+face_rec::face_rec(const char *label_file)
+:knnp(KNearest::create())
+{
+	knnp->setIsClassifier(true);
+	knnp->setDefaultK(3);
+
+	load(label_file);
+}
+
+int face_rec::load(const char *label_file)
+{
 	vector<Mat> ims;
 	vector<int> lbs;
 
-	read_csv(argv[1], ims, lbs);
+	read_csv(label_file, ims, lbs);
 
 	Mat lbv(lbs);
 	lbv.convertTo(lbv, CV_32F);
@@ -63,25 +97,76 @@ int main(int argc, char *argv[])
 	for(int i = 0; i < ims.size(); ++i)
 		ims[i].copyTo(imv.row(i));
 
-	Ptr<KNearest> knnp = KNearest::create();
-	Ptr<TrainData> tdp = TrainData::create(imv, ROW_SAMPLE, lbv);
+	tdp = TrainData::create(imv, ROW_SAMPLE, lbv);
+	return 0;
+}
 
-	tdp->setTrainTestSplitRatio(0.9);
-	std::cout << "Test/Train: " << tdp->getNTestSamples()
-		<< "/" << tdp->getNTrainSamples() << endl;
+int face_rec::set_train_ratio(double train_ratio)
+{
+	tdp->setTrainTestSplitRatio(train_ratio);
+	return 0;
+}
 
+int face_rec::set_default_k(int k)
+{
+	knnp->setDefaultK(k);
+	return 0;
+}
+
+int face_rec::train()
+{
 	knnp->train(tdp);
+	return 0;
+}
 
-	knnp->setDefaultK(5);
-	knnp->setIsClassifier(true);
+int face_rec::get_sample_count() const
+{
+	return tdp->getNTestSamples();
+}
 
-    Mat test = tdp->getTestSampleIdx();
+int face_rec::get_train_count() const
+{
+	return tdp->getNTrainSamples();
+}
 
-	for(int i = 0; i < tdp->getNTestSamples(); ++i) {
+Mat face_rec::get_sample_idx() const
+{
+	return tdp->getTestSampleIdx();
+}
+
+float face_rec::predict(InputArray in, OutputArray out, int flags)
+{
+	return knnp->predict(in, out, flags);
+}
+
+int face_rec::test()
+{
+	Mat test = this->get_sample_idx();
+	for(int i = 0; i < this->get_sample_count(); ++i) {
 		int idx = test.at<int>(i);
-		int pred = knnp->predict(ims[idx]);
+		int pred = this->predict(tdp->getSamples().row(idx));
 		cout << "Predict:   " << pred;
-		cout << "  Actual: " << lbs[idx] << endl;
+		cout << "  Actual: " << tdp->getResponses().row(idx).at<float>() << endl;
 	}
+	return 0;
+}
+
+int main(int argc, char *argv[])
+{
+	if(argc < 2) return 1;
+
+	face_rec fc(argv[1]);
+	fc.set_train_ratio(0.9);
+
+	std::cout << "Test/Train: " << fc.get_sample_count()
+		<< "/" << fc.get_train_count() << endl;
+
+	fc.train();
+    Mat test = fc.get_sample_idx();
+
+	fc.set_default_k(5);
+
+	fc.test();
+
 	return 0;
 }
