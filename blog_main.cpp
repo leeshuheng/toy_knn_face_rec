@@ -53,6 +53,8 @@ public:
 
 public:
 	int load(const char *);
+	int model_save(const char *);
+	int model_load(const char *);
 	int set_train_ratio(double = 0.8);
 	int get_sample_count() const;
 	int get_train_count() const;
@@ -63,15 +65,16 @@ public:
 	int test();
 
 private:
+	int __load(const char *);
+
+private:
 	Ptr<KNearest> knnp;
 	Ptr<TrainData> tdp;
 };
 
 face_rec::face_rec()
-:knnp(KNearest::create())
+:knnp()
 {
-	knnp->setIsClassifier(true);
-	knnp->setDefaultK(3);
 }
 
 face_rec::face_rec(const char *label_file)
@@ -80,10 +83,23 @@ face_rec::face_rec(const char *label_file)
 	knnp->setIsClassifier(true);
 	knnp->setDefaultK(3);
 
-	load(label_file);
+	__load(label_file);
 }
 
 int face_rec::load(const char *label_file)
+{
+	if(!knnp.empty()) knnp.release();
+
+	knnp = KNearest::create();
+
+	knnp->setIsClassifier(true);
+	knnp->setDefaultK(3);
+
+	__load(label_file);
+	return(0);
+}
+
+int face_rec::__load(const char *label_file)
 {
 	vector<Mat> ims;
 	vector<int> lbs;
@@ -98,6 +114,20 @@ int face_rec::load(const char *label_file)
 		ims[i].copyTo(imv.row(i));
 
 	tdp = TrainData::create(imv, ROW_SAMPLE, lbv);
+	return 0;
+}
+
+int face_rec::model_save(const char *fn)
+{
+	knnp->save(fn);
+	return 0;
+}
+
+int face_rec::model_load(const char *fn)
+{
+	if(!knnp.empty()) knnp.release();
+
+	knnp = Algorithm::load<KNearest>(fn);
 	return 0;
 }
 
@@ -139,6 +169,7 @@ float face_rec::predict(InputArray in, OutputArray out, int flags)
 	return knnp->predict(in, out, flags);
 }
 
+
 int face_rec::test()
 {
 	Mat test = this->get_sample_idx();
@@ -168,5 +199,21 @@ int main(int argc, char *argv[])
 
 	fc.test();
 
+	fc.model_save("./model.xml");
+
+	cout << "============================\n";
+
+	face_rec frc;
+	frc.model_load("./model.xml");
+	// fc.model_load("./model.xml");
+
+	vector<Mat> ims;
+	vector<int> lbs;
+	read_csv(argv[1], ims, lbs);
+
+	for(int i = 0; i < ims.size(); ++i) {
+		cout << "Actual:  " << lbs[i]
+			<< "   Predict:   " << frc.predict(ims[i]) << endl;
+	}
 	return 0;
 }
