@@ -193,7 +193,6 @@ int main(int argc, char *argv[])
 		<< "/" << fc.get_train_count() << endl;
 
 	fc.train();
-    Mat test = fc.get_sample_idx();
 
 	fc.set_default_k(5);
 
@@ -211,9 +210,11 @@ int main(int argc, char *argv[])
 	vector<int> lbs;
 	read_csv(argv[1], ims, lbs);
 
-	for(int i = 0; i < ims.size(); ++i) {
-		cout << "Actual:  " << lbs[i]
-			<< "   Predict:   " << frc.predict(ims[i]) << endl;
+    Mat test = fc.get_sample_idx();
+
+	for(int i = 0; i < test.cols; ++i) {
+		cout << "Actual:  " << lbs[test.at<int>(i)]
+			<< "   Predict:   " << frc.predict(ims[test.at<int>(i)]) << endl;
 	}
 	return 0;
 }
