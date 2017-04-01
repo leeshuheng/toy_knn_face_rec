@@ -47,38 +47,38 @@ static void read_csv(const string& filename, vector<Mat>& images, vector<int>& l
 }
 
 class face_rec {
-public:
-	face_rec();
-	face_rec(const char *);
+	public:
+		face_rec();
+		face_rec(const char *);
 
-public:
-	int load(const char *);
-	int model_save(const char *);
-	int model_load(const char *);
-	int set_train_ratio(double = 0.8);
-	int get_sample_count() const;
-	int get_train_count() const;
-	Mat get_sample_idx() const;
-	int set_default_k(int = 3);
-	int train();
-	inline float predict(InputArray, OutputArray = noArray(), int flags = 0);
-	int test();
+	public:
+		int load(const char *);
+		int model_save(const char *);
+		int model_load(const char *);
+		int set_train_ratio(double = 0.8);
+		int get_sample_count() const;
+		int get_train_count() const;
+		Mat get_sample_idx() const;
+		int set_default_k(int = 3);
+		int train();
+		inline float predict(InputArray, OutputArray = noArray(), int flags = 0);
+		int test();
 
-private:
-	int __load(const char *);
+	private:
+		int __load(const char *);
 
-private:
-	Ptr<KNearest> knnp;
-	Ptr<TrainData> tdp;
+	private:
+		Ptr<KNearest> knnp;
+		Ptr<TrainData> tdp;
 };
 
 face_rec::face_rec()
-:knnp()
+	:knnp()
 {
 }
 
 face_rec::face_rec(const char *label_file)
-:knnp(KNearest::create())
+	:knnp(KNearest::create())
 {
 	knnp->setIsClassifier(true);
 	knnp->setDefaultK(3);
@@ -210,7 +210,7 @@ int main(int argc, char *argv[])
 	vector<int> lbs;
 	read_csv(argv[1], ims, lbs);
 
-    Mat test = fc.get_sample_idx();
+	Mat test = fc.get_sample_idx();
 
 	for(int i = 0; i < test.cols; ++i) {
 		cout << "Actual:  " << lbs[test.at<int>(i)]
